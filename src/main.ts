@@ -1,7 +1,8 @@
 import {Application, Graphics, Text} from 'pixi.js';
-import {background, red, scoreStyle, yellow} from "./const.ts";
+import {background, MAX_COUNT_SELECTED_ANIMALS, red, scoreStyle, yellow} from "./const.ts";
 import {handleHeroMove} from "./handleHeroMove.ts";
 import {generateAnimals} from "./generateAnimals.ts";
+import {handleAnimalsMove} from "./handleAnimalsMove.ts";
 
 (async () => {
     const app = new Application();
@@ -12,8 +13,10 @@ import {generateAnimals} from "./generateAnimals.ts";
     node.appendChild(app.canvas);
 
     const mainHero = new Graphics();
-    mainHero.circle(100, 100, 30);
+    mainHero.circle(0, 0, 30);
     mainHero.fill(red);
+    mainHero.position.x = 50
+    mainHero.position.y = 50
     mainHero._zIndex = 2
     app.stage.addChild(mainHero);
 
@@ -26,17 +29,41 @@ import {generateAnimals} from "./generateAnimals.ts";
     scoreText.y = 10;
     app.stage.addChild(scoreText);
 
+    const selectedAnimals: Set<Graphics> = new Set([]);
+
     const handleClick = (event) => {
-        handleHeroMove(event, mainHero, animals)
-        score += 1
-        scoreText.text = `Score: ${score}`
-    }
+        const mainHeroPosition = mainHero.getBounds();
+
+        const newMainHeroSquare = {
+            top: mainHeroPosition.y + 50,
+            bottom: mainHeroPosition.y - 50,
+            left: mainHeroPosition.x - 50,
+            right: mainHeroPosition.x + 50,
+        };
+
+        animals.forEach(el => {
+            if (selectedAnimals.size === MAX_COUNT_SELECTED_ANIMALS) return;
+
+            const position = el.getBounds();
+
+            if (position.x > newMainHeroSquare.left && position.x < newMainHeroSquare.right
+                && position.y > newMainHeroSquare.bottom && position.y < newMainHeroSquare.top ) {
+                selectedAnimals.add(el)
+            }
+        });
+
+        handleHeroMove(event, mainHero);
+        handleAnimalsMove(selectedAnimals, event)
+        score += 1;
+        scoreText.text = `Score: ${score}`;
+    };
+
 
     app.stage.interactive = true;
     app.stage.hitArea = app.screen;
     app.stage.on('pointerdown', handleClick);
 
-    // Create a yellow area at the bottom of the screen
+    // Create a finish area at the bottom of the screen
     const yellowArea = new Graphics();
     yellowArea.rect(app.screen.width / 2 - 150, app.screen.height - 100, 300, 100);
     yellowArea.fill(yellow);
