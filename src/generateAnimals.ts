@@ -30,6 +30,7 @@ function generate (circlesNumber, app, circles) {
         animal.position.x = posX
         animal.position.y = posY
         animal.fill(white);
+        animal._zIndex = 2
 
         app.stage.addChild(animal);
         circles.push(animal);

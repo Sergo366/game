@@ -1,7 +1,7 @@
 import {Application, Graphics} from "pixi.js";
 import {red} from "../const.ts";
 
-export const createMainHero = (app:  Application) => {
+export const createMainHero = (app: Application) => {
     const mainHero = new Graphics();
     mainHero.circle(0, 0, 30);
     mainHero.fill(red);

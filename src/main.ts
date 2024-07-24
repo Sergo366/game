@@ -6,6 +6,7 @@ import {handleAnimalsMove} from "./handleAnimalsMove.ts";
 import {createMainHero} from "./createElements/createMainHero.ts";
 import {createScoreBlock} from "./createElements/createScoreBlock.ts";
 import {createFinishZone} from "./createElements/createFinishZone.ts";
+import {doRectanglesIntersect} from "./utils/doRectanglesIntersect.ts";
 
 (async () => {
     const app = new Application();
@@ -22,34 +23,50 @@ import {createFinishZone} from "./createElements/createFinishZone.ts";
     const mainHero = createMainHero(app)
     const scoreText = createScoreBlock(app, score);
     const finishNode = createFinishZone(app)
+    const finishNodeBounds = finishNode.getBounds()
 
     const handleClick = (event) => {
-        const mainHeroPosition = mainHero.getBounds();
+        const mainHeroBounds = mainHero.getBounds();
 
         const newMainHeroSquare = {
-            top: mainHeroPosition.y + 50,
-            bottom: mainHeroPosition.y - 50,
-            left: mainHeroPosition.x - 50,
-            right: mainHeroPosition.x + 50,
+            top: mainHeroBounds.y + 50,
+            bottom: mainHeroBounds.y - 50,
+            left: mainHeroBounds.x - 50,
+            right: mainHeroBounds.x + 50,
         };
+
+        console.log('selectedAnimals', selectedAnimals)
 
         animals.forEach(el => {
             if (selectedAnimals.size === MAX_COUNT_SELECTED_ANIMALS) return;
-
             const position = el.getBounds();
 
-            if (position.x > newMainHeroSquare.left && position.x < newMainHeroSquare.right
-                && position.y > newMainHeroSquare.bottom && position.y < newMainHeroSquare.top ) {
+            if (position.x > newMainHeroSquare.left
+                && position.x < newMainHeroSquare.right
+                && position.y > newMainHeroSquare.bottom
+                && position.y < newMainHeroSquare.top) {
                 selectedAnimals.add(el)
             }
         });
 
         handleHeroMove(event, mainHero);
         handleAnimalsMove(selectedAnimals, event)
-        score += 1;
-        scoreText.text = `Score: ${score}`;
     };
 
+    app.ticker.add(() => {
+        const mainHeroBounds = mainHero.getBounds();
+
+        if (doRectanglesIntersect(mainHeroBounds, finishNodeBounds) && selectedAnimals.size > 0) {
+            selectedAnimals.forEach(graphic => {
+                app.stage.removeChild(graphic);
+
+                score += 1;
+                scoreText.text = `Score: ${score}`;
+            });
+
+            selectedAnimals.clear()
+        }
+    });
 
     app.stage.interactive = true;
     app.stage.hitArea = app.screen;
