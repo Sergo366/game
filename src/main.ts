@@ -35,8 +35,6 @@ import {doRectanglesIntersect} from "./utils/doRectanglesIntersect.ts";
             right: mainHeroBounds.x + 50,
         };
 
-        console.log('selectedAnimals', selectedAnimals)
-
         animals.forEach(el => {
             if (selectedAnimals.size === MAX_COUNT_SELECTED_ANIMALS) return;
             const position = el.getBounds();
